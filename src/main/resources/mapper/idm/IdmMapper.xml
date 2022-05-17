@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.wan.tool.mapper.idm.IdmMapper">
+
+    <resultMap id="baseResultMap" type="com.wan.tool.model.entity.Company">
+        <result column="hierarchy_name" property="companyName"/>
+        <result column="HIERARCHY_SHOW_CODE" property="hierarchyCode"/>
+        <result column="organization" property="socialCreditCode"/>
+        <result column="legal_name" property="legalName"/>
+        <result column="legal_idCard" property="legalCard"/>
+        <result column="phoneNumber" property="legalPhone"/>
+    </resultMap>
+
+    <sql id="SELECT">
+        SELECT
+            ha.hierarchy_name,
+            hc.HIERARCHY_SHOW_CODE,
+            fai.organization,
+            fai.legal_name,
+            fai.legal_idCard,
+            fai.phoneNumber
+    </sql>
+
+    <sql id="FROM">
+        FROM
+        hierarchy_code AS hc
+        LEFT JOIN hierarchy_application AS ha ON hc.HIERARCHY_REAL_CODE = ha.hierarchy_real_code
+        LEFT JOIN fdd_authencation_company AS fac ON ha.hierarchy_name = fac.company_name
+        LEFT JOIN fdd_authentication_information AS fai ON fac.unique_Id = fai.unique_id
+        LEFT JOIN fadada_authentication fa ON fa.UNIQUE_ID = fac.unique_Id
+    </sql>
+
+    <sql id="WHERE">
+        <where>
+            <if test="companyNames != null">
+                ha.hierarchy_name IN
+                <foreach collection="companyNames" item="companyName" open="(" separator="," close=")">
+                    #{companyName}
+                </foreach>
+            </if>
+            <if test="hierarchyCodes != null">
+                AND hc.HIERARCHY_SHOW_CODE IN
+                <foreach collection="hierarchyCodes" item="hierarchyCode" open="(" separator="," close=")">
+                    #{hierarchyCode}
+                </foreach>
+            </if>
+        </where>
+    </sql>
+
+    <select id="getCompanies" resultMap="baseResultMap">
+        <include refid="SELECT"/>
+        <include refid="FROM"/>
+        <include refid="WHERE"/>
+    </select>
+
+</mapper>
